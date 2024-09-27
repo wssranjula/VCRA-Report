@@ -69,6 +69,9 @@
 
 <body style="background-color: #ffffff;">
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Then load jsPDF-AutoTable -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <div class="header-container" style="margin-top: 0px;">
         <h2 class="header-text">VCRA PRODUCT INSPECTION REPORT</h2>
     </div>
@@ -1095,6 +1098,14 @@
                 async function generatePDF() {
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF();
+
+                    // Check if autoTable is available
+                    if (typeof doc.autoTable !== 'function') {
+                        console.error('autoTable is not a function. The plugin might not be loaded correctly.');
+                        alert('PDF generation failed. Please check the console for more information.');
+                        return;
+                    }
+
                     const pageHeight = doc.internal.pageSize.height;
                     const pageWidth = doc.internal.pageSize.getWidth();
                     const margin = 20;
@@ -1579,7 +1590,7 @@ await addTable(['Description', 'Confirm', 'Not Confirm', 'N/A'], productRows);
             </script>
 </body>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="assets/js/dynamicTable.js"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="assets/js/dynamicTable.js"></script> -->
 
 </html>
