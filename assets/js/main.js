@@ -3,12 +3,15 @@ let uploadCount = 1;
 let photoUploadCount = 1;
 
 // Utility functions
-function handleFileSelect(event, imgElement) {
+function handleFileSelect(event, imgElement, iconElement) {
   const file = event.target.files[0];
   if (file && file.type.startsWith("image/")) {
     const imageURL = URL.createObjectURL(file);
     imgElement.src = imageURL;
     imgElement.style.display = "block";
+    if (iconElement) {
+      iconElement.style.display = "none";
+    }
     imgElement.onload = function () {
       URL.revokeObjectURL(imgElement.src);
     };
@@ -38,13 +41,22 @@ function addNewUpload() {
 
   const newCardContainer = document.createElement("div");
   newCardContainer.classList.add("card-container");
+  newCardContainer.style.display = "flex";
+  newCardContainer.style.flexDirection = "column";
+  newCardContainer.style.alignItems = "center";
+  newCardContainer.style.marginBottom = "20px";
 
   const newCard = document.createElement("div");
   newCard.classList.add("card");
   newCard.style.width = "200px";
   newCard.style.height = "200px";
-  newCard.style.border = "1px solid #ccc";
+  newCard.style.border = "2px dashed #ccc";
+  newCard.style.borderRadius = "10px";
+  newCard.style.display = "flex";
+  newCard.style.justifyContent = "center";
+  newCard.style.alignItems = "center";
   newCard.style.cursor = "pointer";
+  newCard.style.overflow = "hidden";
 
   const newImg = document.createElement("img");
   newImg.id = `image${uploadCount}`;
@@ -54,33 +66,43 @@ function addNewUpload() {
   newImg.style.objectFit = "cover";
   newImg.style.display = "none";
 
+  const imageIcon = document.createElement("i");
+  imageIcon.classList.add("fas", "fa-image");
+  imageIcon.style.fontSize = "48px";
+  imageIcon.style.color = "#ccc";
+
   const newInput = document.createElement("input");
   newInput.type = "file";
   newInput.accept = "image/*";
   newInput.id = `input-file${uploadCount}`;
   newInput.style.display = "none";
 
-  newCard.addEventListener("click", function () {
-    newInput.click();
-  });
-
+  newCard.appendChild(imageIcon);
   newCard.appendChild(newImg);
   newCard.appendChild(newInput);
 
   const newCommentBox = document.createElement("textarea");
   newCommentBox.id = `comment${uploadCount}`;
-  newCommentBox.placeholder = "Add a note...";
+  newCommentBox.placeholder = "Add a description of the product...";
   newCommentBox.style.width = "200px";
-  newCommentBox.style.height = "50px";
+  newCommentBox.style.height = "80px";
   newCommentBox.style.marginTop = "10px";
+  newCommentBox.style.padding = "5px";
+  newCommentBox.style.border = "1px solid #ccc";
+  newCommentBox.style.borderRadius = "5px";
+  newCommentBox.style.resize = "vertical";
 
   newCardContainer.appendChild(newCard);
   newCardContainer.appendChild(newCommentBox);
 
   container.appendChild(newCardContainer);
 
+  newCard.addEventListener("click", function () {
+    newInput.click();
+  });
+
   newInput.addEventListener("change", function (event) {
-    handleFileSelect(event, newImg);
+    handleFileSelect(event, newImg, imageIcon);
   });
 }
 
@@ -96,13 +118,22 @@ function addNewPhotoUpload() {
 
   const newCardContainer = document.createElement("div");
   newCardContainer.classList.add("card-container");
+  newCardContainer.style.display = "flex";
+  newCardContainer.style.flexDirection = "column";
+  newCardContainer.style.alignItems = "center";
+  newCardContainer.style.marginBottom = "20px";
 
   const newCard = document.createElement("div");
   newCard.classList.add("card");
   newCard.style.width = "200px";
   newCard.style.height = "200px";
-  newCard.style.border = "1px solid #ccc";
+  newCard.style.border = "2px dashed #ccc";
+  newCard.style.borderRadius = "10px";
+  newCard.style.display = "flex";
+  newCard.style.justifyContent = "center";
+  newCard.style.alignItems = "center";
   newCard.style.cursor = "pointer";
+  newCard.style.overflow = "hidden";
 
   const newImg = document.createElement("img");
   newImg.id = `photo${photoUploadCount}`;
@@ -112,33 +143,43 @@ function addNewPhotoUpload() {
   newImg.style.objectFit = "cover";
   newImg.style.display = "none";
 
+  const cameraIcon = document.createElement("i");
+  cameraIcon.classList.add("fas", "fa-camera");
+  cameraIcon.style.fontSize = "48px";
+  cameraIcon.style.color = "#ccc";
+
   const newInput = document.createElement("input");
   newInput.type = "file";
   newInput.accept = "image/*";
   newInput.id = `input-photo${photoUploadCount}`;
   newInput.style.display = "none";
 
-  newCard.addEventListener("click", function () {
-    newInput.click();
-  });
-
+  newCard.appendChild(cameraIcon);
   newCard.appendChild(newImg);
   newCard.appendChild(newInput);
 
   const newCommentBox = document.createElement("textarea");
   newCommentBox.id = `photoComment${photoUploadCount}`;
-  newCommentBox.placeholder = "Add a note...";
+  newCommentBox.placeholder = "Add a description of the defect...";
   newCommentBox.style.width = "200px";
-  newCommentBox.style.height = "50px";
+  newCommentBox.style.height = "80px";
   newCommentBox.style.marginTop = "10px";
+  newCommentBox.style.padding = "5px";
+  newCommentBox.style.border = "1px solid #ccc";
+  newCommentBox.style.borderRadius = "5px";
+  newCommentBox.style.resize = "vertical";
 
   newCardContainer.appendChild(newCard);
   newCardContainer.appendChild(newCommentBox);
 
   container.appendChild(newCardContainer);
 
+  newCard.addEventListener("click", function () {
+    newInput.click();
+  });
+
   newInput.addEventListener("change", function (event) {
-    handleFileSelect(event, newImg);
+    handleFileSelect(event, newImg, cameraIcon);
   });
 }
 

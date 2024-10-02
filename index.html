@@ -15,6 +15,7 @@
     <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
     <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link href="assets/css/main.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/globals.css">
     <link rel="stylesheet" href="assets/css/style.css">
@@ -145,24 +146,31 @@
         </form>
     </div>
 
-    <div class="header-container">
-        <h2 class="header-text">Product Pictures</h2>
-    </div>
-    <div class="container-images">
-        <section class="product-pictures">
-            <div class="image-upload" id="imageUploadContainer">
-                <div class="card-container">
-                    <div class="card" onclick="document.getElementById('input-file1').click()" style="width: 200px; height: 200px; border: 1px solid #ccc;">
-                        <img src="" id="image1" alt="Preview Image" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+    <section>
+        <div class="header-container" style="text-align: center; margin-bottom: 20px;">
+            <h2 class="header-text">Product Pictures</h2>
+        </div>
+        
+        <div class="container-images" style="max-width: 894px; margin: 0 auto;">
+            <section class="product-pictures">
+                <div class="image-upload" id="imageUploadContainer" style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
+                    <div class="card-container" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
+                        <div class="card" onclick="document.getElementById('input-file1').click()" style="width: 200px; height: 200px; border: 2px dashed #ccc; border-radius: 10px; display: flex; justify-content: center; align-items: center; cursor: pointer; overflow: hidden;">
+                            <img src="" id="image1" alt="Preview Image" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                            <i class="fas fa-image" style="font-size: 48px; color: #ccc; display: block;"></i>
+                        </div>
+                        <input type="file" accept="image/*" id="input-file1" style="display: none;">
+                        <textarea id="comment1" placeholder="Add a description of the product..." style="width: 200px; height: 80px; margin-top: 10px; padding: 5px; border: 1px solid #ccc; border-radius: 5px; resize: vertical;"></textarea>
                     </div>
-                    <input type="file" accept="image/*" id="input-file1" style="display: none;">
-                    <textarea id="comment1" placeholder="Add a note..." style="width: 200px; height: 50px; margin-top: 10px;"></textarea>
                 </div>
-            </div>
-            <button class="upload-button" onclick="addNewUpload()">Add New</button>
-            <!-- <button class="upload-button" onclick="uploadImages()">Upload Images</button> -->
-        </section>
-    </div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="upload-button" onclick="addNewUpload()" style="background-color: #4CAF50; color: white; border: none; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer; border-radius: 5px;">
+                        <i class="fas fa-plus"></i> Add New Photo
+                    </button>
+                </div>
+            </section>
+        </div>
+    </section>
     
     <div class="header-container">
         <h2 class="header-text">Product Details </h2>
@@ -645,23 +653,27 @@
     </section>
 
     <section>
-        <div class="header-container" style="text-align: center;">
+        <div class="header-container" style="text-align: center; margin-bottom: 20px;">
             <h2 class="header-text">Defect Pictures</h2>
         </div>
         
-        <div class="container-images" style="display: flex; flex-direction: column; align-items: center;">
-            <section class="product-photos" style="display: flex; flex-direction: column; align-items: center;">
+        <div class="container-images" style="max-width: 894px; margin: 0 auto;">
+            <section class="product-photos">
                 <div class="photo-upload" id="photoUploadContainer" style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
-                    <div class="card-container">
-                        <div class="card" onclick="document.getElementById('input-photo1').click()" style="width: 200px; height: 200px; border: 1px solid #ccc;">
+                    <div class="card-container" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
+                        <div class="card" onclick="document.getElementById('input-photo1').click()" style="width: 200px; height: 200px; border: 2px dashed #ccc; border-radius: 10px; display: flex; justify-content: center; align-items: center; cursor: pointer; overflow: hidden;">
                             <img src="" id="photo1" alt="Preview Photo" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                            <i class="fas fa-camera" style="font-size: 48px; color: #ccc; display: block;"></i>
                         </div>
                         <input type="file" accept="image/*" id="input-photo1" style="display: none;">
-                        <textarea id="photoComment1" placeholder="Add a note..." style="width: 200px; height: 50px; margin-top: 10px;"></textarea>
+                        <textarea id="photoComment1" placeholder="Add a description of the defect..." style="width: 200px; height: 80px; margin-top: 10px; padding: 5px; border: 1px solid #ccc; border-radius: 5px; resize: vertical;"></textarea>
                     </div>
                 </div>
-                <button class="upload-button" style="margin-top: 20px;" onclick="addNewPhotoUpload()">Add New Photo</button>
-                <!-- <button class="upload-button" style="margin-top: 10px;" onclick="uploadPhotos()">Upload Photos</button> -->
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="upload-button" onclick="addNewPhotoUpload()" style="background-color: #4CAF50; color: white; border: none; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer; border-radius: 5px;">
+                        <i class="fas fa-plus"></i> Add New Photo
+                    </button>
+                </div>
             </section>
         </div>
     </section>
