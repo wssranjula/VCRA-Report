@@ -201,6 +201,7 @@ async function generatePDF() {
   // Define colors
   const primaryColor = [0, 123, 255]; // Blue
   const secondaryColor = [108, 117, 125]; // Gray
+  const lightBlueBackground = [235, 245, 255]; // Light blue for background
 
   function addSectionTitle(title) {
     doc.setFontSize(16);
@@ -221,6 +222,7 @@ async function generatePDF() {
       doc.addPage();
       y = margin;
       addPageHeader();
+      addBackgroundColor();
       return true;
     }
     return false;
@@ -233,7 +235,15 @@ async function generatePDF() {
     doc.line(margin, 15, pageWidth - margin, 15);
     y = 25;
   }
-
+  function addBackgroundColor() {
+    doc.setFillColor(...lightBlueBackground);
+    doc.rect(0, 0, pageWidth, pageHeight, "F");
+  }
+    // Helper function to format date to USA format (MM/DD/YYYY)
+    function formatDateUSA(dateString) {
+      const date = new Date(dateString);
+      return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+    }
   async function addTable(headers, rows, emptyHeaders = false) {
     return new Promise((resolve) => {
       if (!Array.isArray(rows) || rows.length === 0) {
@@ -418,6 +428,7 @@ async function generatePDF() {
     doc.setFontSize(12);
     doc.text(new Date().toLocaleDateString(), pageWidth / 2, pageHeight - 30, { align: "center" });
 
+
     // Add logo
     const logoURL = "assets/img/logo.png";
     const logoImg = await loadImage(logoURL);
@@ -434,10 +445,11 @@ async function generatePDF() {
 
     // Start content on new page
     doc.addPage();
+    addBackgroundColor();
     addPageHeader();
 
-    // Function to add a section with title and table
-    async function addSection(title, headers, rows, emptyHeaders = false) {
+     // Function to add a section with title and table
+     async function addSection(title, headers, rows, emptyHeaders = false) {
       const contentHeight = (rows.length + 1) * 10 + 40; // Estimate height
       if (checkPageBreak(contentHeight)) {
         y += 10; // Add some space at the top of the new page
@@ -446,9 +458,8 @@ async function generatePDF() {
       await addTable(headers, rows, emptyHeaders);
     }
 
-
     // Add sections
-    await addSection("Inspection Form Details", [], collectFormData("inspectionForm"), true); // Note the empty headers array and 'true' parameter
+    await addSection("Inspection Form Details", [], collectFormData("inspectionForm"), true);
     await addSection("Production Order Number", ["Production Order Number", "Color", "Quantity"], collectTableData("#dynamicTable1"));
     await addSection("AQL and Sample Size", [], collectFormData("thirdform"), true);
     
