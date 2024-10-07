@@ -19,6 +19,7 @@ function handleFileSelect(event, imgElement, iconElement) {
     alert("Please select a valid image file.");
   }
 }
+
 // Helper function to load image as Data URL
 function loadImage(url) {
   return new Promise((resolve, reject) => {
@@ -189,7 +190,6 @@ function uploadPhotos() {
 }
 
 // PDF Generation
-// PDF Generation
 async function generatePDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
@@ -235,15 +235,18 @@ async function generatePDF() {
     doc.line(margin, 15, pageWidth - margin, 15);
     y = 25;
   }
+
   function addBackgroundColor() {
     doc.setFillColor(...lightBlueBackground);
     doc.rect(0, 0, pageWidth, pageHeight, "F");
   }
-    // Helper function to format date to USA format (MM/DD/YYYY)
-    function formatDateUSA(dateString) {
-      const date = new Date(dateString);
-      return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
-    }
+
+  // Helper function to format date to USA format (MM/DD/YYYY)
+  function formatDateUSA(dateString) {
+    const date = new Date(dateString);
+    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+  }
+
   async function addTable(headers, rows, emptyHeaders = false) {
     return new Promise((resolve) => {
       if (!Array.isArray(rows) || rows.length === 0) {
@@ -281,47 +284,56 @@ async function generatePDF() {
     });
   }
 
-
   async function addImages(containerSelector, title) {
-    // Always start a new page for image sections
-    doc.addPage();
-    y = margin;
-    addPageHeader();
-
-    addSectionTitle(title);
+    const imagesPerRow = 2;
+    const rowsPerPage = 3;
+    const imagesPerPage = imagesPerRow * rowsPerPage;
+  
     const container = document.querySelector(containerSelector);
     const images = container.querySelectorAll('img');
     const comments = container.querySelectorAll('textarea');
-    
-    const maxWidth = (pageWidth - 5 * margin) / 2; // Width for each image (2 per row)
-    const maxHeight = 80; // Maximum height for images
-    
-    for (let i = 0; i < images.length; i += 2) {
-      if (checkPageBreak(maxHeight + 40)) {
-        y += 10; // Add some space at the top of the new page
-      }
-      
-      for (let j = 0; j < 2; j++) {
-        if (i + j < images.length && images[i + j].src) {
+  
+    // Increase the width and height allocation for each image
+    const maxWidth = (pageWidth - 2.5 * margin) / imagesPerRow; // Increased width
+    const maxHeight = (pageHeight - 3 * margin - 40) / rowsPerPage; // Increased height, accounting for title and margins
+  
+    for (let i = 0; i < images.length; i += imagesPerPage) {
+      // Always start a new page for each set of images
+      doc.addPage();
+      y = margin;
+      addPageHeader();
+      addBackgroundColor();
+  
+      // Add section title on each new page of images
+      addSectionTitle(title);
+      y += 15; // Increase space after the title
+  
+      for (let j = 0; j < imagesPerPage && (i + j) < images.length; j++) {
+        const rowIndex = Math.floor(j / imagesPerRow);
+        const colIndex = j % imagesPerRow;
+  
+        if (images[i + j].src) {
           try {
             const img = images[i + j];
             const imgData = await getBase64Image(img);
-            
+  
             // Calculate dimensions to maintain aspect ratio
             let imgWidth = img.naturalWidth;
             let imgHeight = img.naturalHeight;
             const ratio = Math.min(maxWidth / imgWidth, maxHeight / imgHeight);
             imgWidth *= ratio;
             imgHeight *= ratio;
-            
-            const xOffset = j * (maxWidth + margin);
-            doc.addImage(imgData, 'JPEG', margin + xOffset, y, imgWidth, imgHeight);
-            
+  
+            const xOffset = colIndex * (maxWidth + margin / 2);
+            const yOffset = rowIndex * (maxHeight + 25); // Increased space between rows
+  
+            doc.addImage(imgData, 'JPEG', margin + xOffset, y + yOffset, imgWidth, imgHeight);
+  
             // Add comment below the image
             const comment = comments[i + j].value;
-            doc.setFontSize(8);
+            doc.setFontSize(9); // Slightly larger font for better readability
             doc.setTextColor(...secondaryColor);
-            doc.text(comment, margin + xOffset, y + imgHeight + 5, { 
+            doc.text(comment, margin + xOffset, y + yOffset + imgHeight + 5, { 
               maxWidth: maxWidth,
               align: 'left'
             });
@@ -330,11 +342,13 @@ async function generatePDF() {
           }
         }
       }
-      
-      y += maxHeight + 30; // Move to next row
     }
-    
-    y += 10; // Add some space after the images section
+  
+    // Ensure we're on a new page after adding all images
+    doc.addPage();
+    y = margin;
+    addPageHeader();
+    addBackgroundColor();
   }
 
   function getBase64Image(img) {
@@ -357,11 +371,29 @@ async function generatePDF() {
     const form = document.getElementById(formId);
     const formData = new FormData(form);
     const formRows = [];
+  
     formData.forEach((value, key) => {
+      const inputElement = form.querySelector(`[name="${key}"]`);  // Get the input element
       const label = form.querySelector(`label[for="${key}"]`)?.innerText || key;
+  
+      // Check if the input is of type 'date'
+      if (inputElement?.type === 'date' && value) {
+        // Format the date value into DD-MM-YYYY
+        value = formatDateDDMMYYYY(value);
+      }
+  
       formRows.push([label, value]);
     });
+  
     return formRows;
+  }
+  
+  function formatDateDDMMYYYY(dateString) {
+    const date = new Date(dateString);
+    const day = ('0' + date.getDate()).slice(-2);  // Two digits for day
+    const month = ('0' + (date.getMonth() + 1)).slice(-2);  // Two digits for month
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
   }
 
   function collectTableData(tableSelector, skipHeader = true) {
@@ -380,6 +412,33 @@ async function generatePDF() {
       }
     } else {
       console.error(`Table element "${tableSelector}" not found.`);
+    }
+    return tableRows;
+  }
+
+  function collectTableData1(tableSelector, skipHeader = true) {
+    const table = document.querySelector(tableSelector);
+    const tableRows = [];
+    
+    if (table) {
+        const rows = table.getElementsByTagName("tr");
+        for (let i = skipHeader ? 1 : 0; i < rows.length; i++) {
+            const cells = rows[i].getElementsByTagName("td");
+            const rowData = [];
+            for (let j = 0; j < cells.length; j++) {
+                const input = cells[j].querySelector("input");
+                // Check for input and replace empty with a tick
+                if (input) {
+                    rowData.push(input.value.trim() === "" ? "X" : input.value);  // Replace empty with tick
+                } else {
+                    const cellValue = cells[j].innerText.trim();
+                    rowData.push(cellValue === "" ? "X" : cellValue);  // Replace empty with tick for text
+                }
+            }
+            tableRows.push(rowData);
+        }
+    } else {
+        console.error(`Table element "${tableSelector}" not found.`);
     }
     return tableRows;
   }
@@ -418,22 +477,24 @@ async function generatePDF() {
   }
 
   try {
+    const formattedDate = formatDateDDMMYYYY(new Date());
+
     // Add cover page
-    doc.setFillColor(...primaryColor);
+    doc.setFillColor(255,255,255);
     doc.rect(0, 0, pageWidth, pageHeight, "F");
-    doc.setTextColor(255, 255, 255);
+    doc.setTextColor(0, 0, 0);
+    doc.setFont("Constantia", "bold"); 
     doc.setFontSize(24);
     doc.text("VCRA PRODUCT", pageWidth / 2, pageHeight / 2 - 20, { align: "center" });
     doc.text("INSPECTION REPORT", pageWidth / 2, pageHeight / 2 + 10, { align: "center" });
     doc.setFontSize(12);
-    doc.text(new Date().toLocaleDateString(), pageWidth / 2, pageHeight - 30, { align: "center" });
-
+    doc.text(formattedDate, pageWidth / 2, pageHeight - 30, { align: "center" });
 
     // Add logo
-    const logoURL = "assets/img/logo.png";
+    const logoURL = "assets/img/VCRAlog.png";
     const logoImg = await loadImage(logoURL);
-    const logoWidth = 60;
-    const logoHeight = 30;
+    const logoWidth = 100;
+    const logoHeight = 40;
     doc.addImage(
       logoImg,
       "PNG",
@@ -448,8 +509,8 @@ async function generatePDF() {
     addBackgroundColor();
     addPageHeader();
 
-     // Function to add a section with title and table
-     async function addSection(title, headers, rows, emptyHeaders = false) {
+    // Function to add a section with title and table
+    async function addSection(title, headers, rows, emptyHeaders = false) {
       const contentHeight = (rows.length + 1) * 10 + 40; // Estimate height
       if (checkPageBreak(contentHeight)) {
         y += 10; // Add some space at the top of the new page
@@ -467,7 +528,7 @@ async function generatePDF() {
     await addImages("#imageUploadContainer", "Product Pictures");
     
     await addSection("Product Details Verification", ["Description", "Confirm", "Not Confirm", "N/A"], collectRadioData(".product-details-verification table"));
-    await addSection("Measurement Verification Sheet", ["Point of Measure", "Size", "Tolerance", "Spec", "", "", ""], collectTableData("#dynamicTable"));
+    await addSection("Measurement Verification Sheet", ["Point of Measure", "Size", "Tolerance", "Spec", "", "", ""], collectTableData1("#dynamicTable"));
     await addSection("Quality Check List On Material & Workmanship", ["Material & Workmanship Details", "Critical", "Major", "Minor"], collectTableData("#dynamicTable2"));
     await addSection("Appearance and Packing", ["Description", "Confirm", "Not Confirm", "N/A", "Comments"], collectRadioData("#form1111"));
     await addSection("Material", ["Description", "Confirm", "Not Confirm", "N/A", "Comments"], collectRadioData("#formmaterial"));
