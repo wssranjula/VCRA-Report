@@ -438,28 +438,39 @@ async function generatePDF() {
     const tableRows = [];
     
     if (table) {
-        const rows = table.getElementsByTagName("tr");
-        for (let i = skipHeader ? 1 : 0; i < rows.length; i++) {
-            const cells = rows[i].getElementsByTagName("td");
-            const rowData = [];
-            for (let j = 0; j < cells.length; j++) {
-                const input = cells[j].querySelector("input");
-                // Check for input and replace empty with a tick
-                if (input) {
-                    rowData.push(input.value.trim() === "" ? "OK" : input.value);  // Replace empty with tick
-                } else {
-                    const cellValue = cells[j].innerText.trim();
-                    rowData.push(cellValue === "" ? "OK" : cellValue);  // Replace empty with tick for text
-                }
-            }
-            tableRows.push(rowData);
+      const rows = table.getElementsByTagName("tr");
+      for (let i = skipHeader ? 1 : 0; i < rows.length; i++) {
+        const cells = rows[i].getElementsByTagName("td");
+        const rowData = [];
+        let hasNonEmptyCell = false;
+  
+        for (let j = 0; j < cells.length; j++) {
+          const input = cells[j].querySelector("input");
+          let cellValue = input ? input.value.trim() : cells[j].innerText.trim();
+  
+          if (cellValue) {
+            hasNonEmptyCell = true;
+          }
+  
+          rowData.push(cellValue);
         }
+  
+        // Replace empty cells with "OK" if there are non-empty cells in the row
+        if (hasNonEmptyCell) {
+          for (let k = 0; k < rowData.length; k++) {
+            if (!rowData[k]) {
+              rowData[k] = "OK";
+            }
+          }
+        }
+  
+        tableRows.push(rowData);
+      }
     } else {
-        console.error(`Table element "${tableSelector}" not found.`);
+      console.error(`Table element "${tableSelector}" not found.`);
     }
     return tableRows;
-
-}
+  }
 
 
 
