@@ -287,21 +287,25 @@ async function generatePDF() {
     doc.addPage();
     y = margin;
     addPageHeader();
-
+  
     addSectionTitle(title);
     const container = document.querySelector(containerSelector);
     const images = container.querySelectorAll('img');
     const comments = container.querySelectorAll('textarea');
     
-    const maxWidth = (pageWidth - 5 * margin) / 2; // Width for each image (2 per row)
-    const maxHeight = 80; // Maximum height for images
+    const maxWidth = (pageWidth - 3 * margin) / 2; // Width for each image (2 per row)
+    const maxHeight = 120; // Maximum height for images
+    const commentHeight = 20; // Estimated height for comments
     
-    for (let i = 0; i < images.length; i += 2) {
-      if (checkPageBreak(maxHeight + 40)) {
-        y += 10; // Add some space at the top of the new page
+    for (let i = 0; i < images.length; i += 4) {
+      if (i > 0) { // Add a new page after every 4 images
+        doc.addPage();
+        y = margin;
+        addPageHeader();
+        addSectionTitle(title);
       }
       
-      for (let j = 0; j < 2; j++) {
+      for (let j = 0; j < 4; j++) {
         if (i + j < images.length && images[i + j].src) {
           try {
             const img = images[i + j];
@@ -314,14 +318,16 @@ async function generatePDF() {
             imgWidth *= ratio;
             imgHeight *= ratio;
             
-            const xOffset = j * (maxWidth + margin);
-            doc.addImage(imgData, 'JPEG', margin + xOffset, y, imgWidth, imgHeight);
+            const xOffset = (j % 2) * (maxWidth + margin);
+            const yOffset = Math.floor(j / 2) * (maxHeight + commentHeight + 10);
+            
+            doc.addImage(imgData, 'JPEG', margin + xOffset, y + yOffset, imgWidth, imgHeight);
             
             // Add comment below the image
             const comment = comments[i + j].value;
             doc.setFontSize(8);
             doc.setTextColor(...secondaryColor);
-            doc.text(comment, margin + xOffset, y + imgHeight + 5, { 
+            doc.text(comment, margin + xOffset, y + yOffset + imgHeight + 5, { 
               maxWidth: maxWidth,
               align: 'left'
             });
@@ -331,7 +337,7 @@ async function generatePDF() {
         }
       }
       
-      y += maxHeight + 30; // Move to next row
+      y += 2 * (maxHeight + commentHeight + 10); // Move to next section
     }
     
     y += 10; // Add some space after the images section
