@@ -690,6 +690,48 @@
                 <input type="radio" name="option"> HOLD
             </button>
         </div>
+
+        <div style="display: flex; justify-content: center; align-items: center;">
+            <textarea id="resultcomment1qq" placeholder="Comments..." 
+                      style="width: 450px; height: 100px; margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; resize: vertical;"></textarea>
+        </div>
+
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+            }
+            .container {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 50px;
+                padding: 0 50px;
+            }
+            .signature-box {
+                text-align: center;
+            }
+            .signature-line {
+                border-top: 1px dotted black;
+                margin-bottom: 10px;
+                width: 300px;
+            }
+        </style>
+        <title>Signature Section</title>
+    </head>
+        <div class="container" hidden>
+            <div class="signature-box">
+                <div class="signature-line"></div>
+                <p>Name & Signature of Auditor</p>
+            </div>
+            <div class="signature-box">
+                <div class="signature-line"></div>
+                <p>Name & Signature of Vendor</p>
+            </div>
+        </div>
+    
+
+
+
         <div class="button class" style="text-align: right; width: 78%; margin: 0 auto; margin-top: 80px;">
             <button class="upload-button" style="padding-inline: 40px;" onclick="generatePDF()">Submit</button>
         </div>

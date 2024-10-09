@@ -19,7 +19,6 @@ function handleFileSelect(event, imgElement, iconElement) {
     alert("Please select a valid image file.");
   }
 }
-
 // Helper function to load image as Data URL
 function loadImage(url) {
   return new Promise((resolve, reject) => {
@@ -190,6 +189,7 @@ function uploadPhotos() {
 }
 
 // PDF Generation
+// PDF Generation
 async function generatePDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
@@ -235,18 +235,15 @@ async function generatePDF() {
     doc.line(margin, 15, pageWidth - margin, 15);
     y = 25;
   }
-
   function addBackgroundColor() {
     doc.setFillColor(...lightBlueBackground);
     doc.rect(0, 0, pageWidth, pageHeight, "F");
   }
-
-  // Helper function to format date to USA format (MM/DD/YYYY)
-  function formatDateUSA(dateString) {
-    const date = new Date(dateString);
-    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
-  }
-
+    // Helper function to format date to USA format (MM/DD/YYYY)
+    function formatDateUSA(dateString) {
+      const date = new Date(dateString);
+      return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+    }
   async function addTable(headers, rows, emptyHeaders = false) {
     return new Promise((resolve) => {
       if (!Array.isArray(rows) || rows.length === 0) {
@@ -284,56 +281,47 @@ async function generatePDF() {
     });
   }
 
+
   async function addImages(containerSelector, title) {
-    const imagesPerRow = 2;
-    const rowsPerPage = 3;
-    const imagesPerPage = imagesPerRow * rowsPerPage;
-  
+    // Always start a new page for image sections
+    doc.addPage();
+    y = margin;
+    addPageHeader();
+
+    addSectionTitle(title);
     const container = document.querySelector(containerSelector);
     const images = container.querySelectorAll('img');
     const comments = container.querySelectorAll('textarea');
-  
-    // Increase the width and height allocation for each image
-    const maxWidth = (pageWidth - 2.5 * margin) / imagesPerRow; // Increased width
-    const maxHeight = (pageHeight - 3 * margin - 40) / rowsPerPage; // Increased height, accounting for title and margins
-  
-    for (let i = 0; i < images.length; i += imagesPerPage) {
-      // Always start a new page for each set of images
-      doc.addPage();
-      y = margin;
-      addPageHeader();
-      addBackgroundColor();
-  
-      // Add section title on each new page of images
-      addSectionTitle(title);
-      y += 15; // Increase space after the title
-  
-      for (let j = 0; j < imagesPerPage && (i + j) < images.length; j++) {
-        const rowIndex = Math.floor(j / imagesPerRow);
-        const colIndex = j % imagesPerRow;
-  
-        if (images[i + j].src) {
+    
+    const maxWidth = (pageWidth - 5 * margin) / 2; // Width for each image (2 per row)
+    const maxHeight = 80; // Maximum height for images
+    
+    for (let i = 0; i < images.length; i += 2) {
+      if (checkPageBreak(maxHeight + 40)) {
+        y += 10; // Add some space at the top of the new page
+      }
+      
+      for (let j = 0; j < 2; j++) {
+        if (i + j < images.length && images[i + j].src) {
           try {
             const img = images[i + j];
             const imgData = await getBase64Image(img);
-  
+            
             // Calculate dimensions to maintain aspect ratio
             let imgWidth = img.naturalWidth;
             let imgHeight = img.naturalHeight;
             const ratio = Math.min(maxWidth / imgWidth, maxHeight / imgHeight);
             imgWidth *= ratio;
             imgHeight *= ratio;
-  
-            const xOffset = colIndex * (maxWidth + margin / 2);
-            const yOffset = rowIndex * (maxHeight + 25); // Increased space between rows
-  
-            doc.addImage(imgData, 'JPEG', margin + xOffset, y + yOffset, imgWidth, imgHeight);
-  
+            
+            const xOffset = j * (maxWidth + margin);
+            doc.addImage(imgData, 'JPEG', margin + xOffset, y, imgWidth, imgHeight);
+            
             // Add comment below the image
             const comment = comments[i + j].value;
-            doc.setFontSize(9); // Slightly larger font for better readability
+            doc.setFontSize(8);
             doc.setTextColor(...secondaryColor);
-            doc.text(comment, margin + xOffset, y + yOffset + imgHeight + 5, { 
+            doc.text(comment, margin + xOffset, y + imgHeight + 5, { 
               maxWidth: maxWidth,
               align: 'left'
             });
@@ -342,13 +330,11 @@ async function generatePDF() {
           }
         }
       }
+      
+      y += maxHeight + 30; // Move to next row
     }
-  
-    // Ensure we're on a new page after adding all images
-    doc.addPage();
-    y = margin;
-    addPageHeader();
-    addBackgroundColor();
+    
+    y += 10; // Add some space after the images section
   }
 
   function getBase64Image(img) {
@@ -368,6 +354,7 @@ async function generatePDF() {
   }
 
   function collectFormData(formId) {
+    
     const form = document.getElementById(formId);
     const formData = new FormData(form);
     const formRows = [];
@@ -393,8 +380,32 @@ async function generatePDF() {
     const day = ('0' + date.getDate()).slice(-2);  // Two digits for day
     const month = ('0' + (date.getMonth() + 1)).slice(-2);  // Two digits for month
     const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
+    return `${month}-${day}-${year}`;
   }
+
+  function addSignatureSection() {
+    const signatureLineWidth = 80; // Width of the signature line
+    const lineHeight = 15;
+    
+    // Add signature lines
+    doc.setLineWidth(0.5);
+    doc.setDrawColor(0); // Black color for signature lines
+    
+    // Auditor signature
+    let signatureY = y + 30; // Adjust vertical position based on your layout
+    let signatureX = margin;
+    doc.line(signatureX, signatureY, signatureX + signatureLineWidth, signatureY); // Signature line
+    doc.setFontSize(10);
+    doc.text('Name & Signature of Auditor', signatureX, signatureY + lineHeight); // Label
+    
+    // Vendor/Representative signature
+    signatureX = pageWidth - margin - signatureLineWidth; // Align on the right
+    doc.line(signatureX, signatureY, signatureX + signatureLineWidth, signatureY); // Signature line
+    doc.text('Name & Signature of Vendor', signatureX, signatureY + lineHeight, { align: 'center' });
+    
+    y = signatureY + lineHeight + 20; // Update y position for further content if needed
+  }
+  
 
   function collectTableData(tableSelector, skipHeader = true) {
     const table = document.querySelector(tableSelector);
@@ -429,10 +440,10 @@ async function generatePDF() {
                 const input = cells[j].querySelector("input");
                 // Check for input and replace empty with a tick
                 if (input) {
-                    rowData.push(input.value.trim() === "" ? "X" : input.value);  // Replace empty with tick
+                    rowData.push(input.value.trim() === "" ? "OK" : input.value);  // Replace empty with tick
                 } else {
                     const cellValue = cells[j].innerText.trim();
-                    rowData.push(cellValue === "" ? "X" : cellValue);  // Replace empty with tick for text
+                    rowData.push(cellValue === "" ? "OK" : cellValue);  // Replace empty with tick for text
                 }
             }
             tableRows.push(rowData);
@@ -441,7 +452,11 @@ async function generatePDF() {
         console.error(`Table element "${tableSelector}" not found.`);
     }
     return tableRows;
-  }
+
+}
+
+
+
 
   function collectRadioData(containerSelector) {
     const container = document.querySelector(containerSelector);
@@ -490,6 +505,7 @@ async function generatePDF() {
     doc.setFontSize(12);
     doc.text(formattedDate, pageWidth / 2, pageHeight - 30, { align: "center" });
 
+
     // Add logo
     const logoURL = "assets/img/VCRAlog.png";
     const logoImg = await loadImage(logoURL);
@@ -509,8 +525,8 @@ async function generatePDF() {
     addBackgroundColor();
     addPageHeader();
 
-    // Function to add a section with title and table
-    async function addSection(title, headers, rows, emptyHeaders = false) {
+     // Function to add a section with title and table
+     async function addSection(title, headers, rows, emptyHeaders = false) {
       const contentHeight = (rows.length + 1) * 10 + 40; // Estimate height
       if (checkPageBreak(contentHeight)) {
         y += 10; // Add some space at the top of the new page
@@ -541,6 +557,41 @@ async function generatePDF() {
     const inspectionResult = document.querySelector('.button-group input[type="radio"]:checked');
     const resultText = inspectionResult ? inspectionResult.parentElement.textContent.trim() : "No option selected";
     await addSection("Inspection Result", ["Inspection Result"], [[resultText]]);
+
+    
+    // Retrieve comment from textarea and add it to the PDF
+    const comments = document.getElementById('resultcomment1qq')?.value || 'No comments provided';
+    await addSection("Comments", ["Comment"], [[comments]]);
+
+
+    y += 18; 
+
+    const signatureLineWidth = 80; // Width of the signature line
+    const lineHeight = 7; // Line height for text
+    const spaceBetween = 5; // Space between the signature lines and the text
+
+    // Auditor signature on the left
+    let signatureY = y + spaceBetween; // Starting Y position for signatures
+    let auditorX = margin; // Left margin for auditor's signature
+
+    // Draw Auditor signature line and text
+    doc.setDrawColor(0); // Black color for lines
+    doc.setLineWidth(0.5);
+    doc.line(auditorX, signatureY, auditorX + signatureLineWidth, signatureY); // Auditor signature line
+    doc.setFontSize(8);
+    doc.text('Name & Signature of Auditor', auditorX, signatureY + lineHeight); // Auditor label
+
+    // Vendor/Representative signature on the right
+    let vendorX = pageWidth - margin - signatureLineWidth; // Align Vendor signature to the right
+
+    // Draw Vendor signature line
+    doc.line(vendorX, signatureY, vendorX + signatureLineWidth, signatureY); // Vendor signature line
+
+    // Draw the Vendor text below the signature line
+    doc.text('Name & Signature of Vendor', vendorX, signatureY + lineHeight); // First line of text
+
+    // Update y position for further content if needed
+    y = signatureY + lineHeight + 30; // Adjust y for next section
 
     // Save the PDF
     doc.save("VCRA-Product-Inspection-Report.pdf");
